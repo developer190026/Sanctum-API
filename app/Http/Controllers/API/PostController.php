@@ -47,19 +47,17 @@ class PostController extends Controller
        ]);
        if($validatorUser->fails()){
 
-    return response()->json([
-        "status" => false,
-        "message" => 'validation error',
-        "error" =>$validatorUser->errors()->all(),
-    ],401);
-       }
-       
-
-$img = $request->image;
-$ext = $img->getClientOriginalExtension(); // entention of the image
-$ImageName = time().".".$ext;
-
-$img->move(public_path()."/uploads", $ImageName);
+        return response()->json([
+            "status" => false,
+            "message" => 'validation error',
+            "error" =>$validatorUser->errors()->all(),
+        ],401);
+        }
+        
+    $img = $request->image;
+    $ext = $img->getClientOriginalExtension(); // entention of the image
+    $ImageName = time().".".$ext;
+    $img->move(public_path()."/uploads", $ImageName);
 
         $posts = Post::create([
 
@@ -112,14 +110,76 @@ $img->move(public_path()."/uploads", $ImageName);
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            "title" => "required",
+            "description" => "required",
+            "image" => "sometimes|mimes:jpg,png,gif"
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                "status" => false,
+                "message" => 'Validation error updating',
+                "errors" => $validator->errors()->all(),
+            ], 401);
+        }
+    
+        $post = Post::find($id);
+    
+        if (!$post) {
+            return response()->json([
+                "status" => false,
+                "message" => "Post not found"
+            ], 404);
+        }
+    
+        $imageName = $post->image; // Default to current image
+    
+        if ($request->hasFile('image')) {
+            $path = public_path('/uploads');
+    
+            // Delete old image if exists
+            if ($imageName && file_exists($path . '/' . $imageName)) {
+                unlink($path . '/' . $imageName);
+            }
+    
+            $img = $request->file('image');
+            $ext = $img->getClientOriginalExtension();
+            $imageName = time() . '.' . $ext;
+            $img->move($path, $imageName);
+        }
+    
+        $post->update([
+            "title" => $request->title,
+            "description" => $request->description,
+            "image" => $imageName
+        ]);
+    
+        return response()->json([
+            "status" => true,
+            "message" => "Post updated successfully",
+            "post" => $post
+        ], 200);
     }
-
+    
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
         //
+        $ImagePah = Post::select("image")->where("id",$id)->get();
+        $filePath = public_path()."/uploads/".$ImagePah[0]["image"];
+
+        unlink($filePath);
+
+        $post = Post::where("id",$id)->delete();
+
+        return response()->json([
+         "status" => true,
+         "message" => "Post has been removed",
+         "Post" => $post
+
+        ]);
     }
 }
