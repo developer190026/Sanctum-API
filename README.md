@@ -59,3 +59,55 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+API
+
+1. http://127.0.0.1:8000/api/login
+Method: Get
+Body: json
+{
+  "email": "test@gmail.com",
+  "password": "admin@12345"
+}
+
+
+Response:
+{
+    "status": true,
+    "message": "user loggedin succesfully",
+    "token": "11|XVol7NUuzXkCAZ0Hii35l7WojvPoTHUEO2Zjnnzj8483b624",
+    "token_type": "bearer"
+}
+
+2. http://127.0.0.1:8000/api/post
+Method: POST
+
+Bearer token:
+
+11|XVol7NUuzXkCAZ0Hii35l7WojvPoTHUEO2Zjnnzj8483b624
+
+Body: form data
+title : test
+desription  : test description
+image: image url
+
+Response:
+{
+    "status": true,
+    "message": "Post created successfully",
+    "Posts": {
+        "title": "test",
+        "description": "test description",
+        "image": "1748499919.png",
+        "updated_at": "2025-05-29T06:25:19.000000Z",
+        "created_at": "2025-05-29T06:25:19.000000Z",
+        "id": 4
+    }
+}
+
+3. http://127.0.0.1:8000/api/post/2 = updated 
+4. logout
+http://127.0.0.1:8000/api/logout
+Bearer token:
+
+11|XVol7NUuzXkCAZ0Hii35l7WojvPoTHUEO2Zjnnzj8483b624
